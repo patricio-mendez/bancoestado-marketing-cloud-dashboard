@@ -1007,17 +1007,50 @@
                         </div>
                     </div>
                     <div class="metric-card success selectable" id="propuesta-2027" onclick="selectPropuesta('2027')">
-                        <h3 style="font-size: 1.5em; font-weight: 700;">PROPUESTA 2: Junio <span style="color: var(--value-green);">2028</span> <span style="display: block; font-size: 0.55em; color: var(--text-gray); font-weight: 600; margin-top: 4px; letter-spacing: 0.5px;">24 MESES · JUN 26 → JUN 28</span></h3>
+                        <h3 style="font-size: 1.5em; font-weight: 700;">PROPUESTA 2: <span id="prop2-titulo-mes" style="color: var(--value-green);">Junio 2028</span> <span id="prop2-subtitulo" style="display: block; font-size: 0.55em; color: var(--text-gray); font-weight: 600; margin-top: 4px; letter-spacing: 0.5px;">24 MESES · JUN 26 → JUN 28</span></h3>
                         <div style="text-align: left; padding: 0 20px; margin-top: 16px;">
                             <p style="margin: 8px 0; font-size: 0.95em;"><strong>Consumo proyectado:</strong> <span id="prop2-consumo">-</span></p>
                             <p style="margin: 8px 0; font-size: 0.95em;"><strong>Capacidad actual:</strong> <span id="prop2-actual">-</span></p>
                             <p style="margin: 8px 0; font-size: 0.95em;"><strong>Capacidad adicional:</strong> <span id="prop2-adicional">-</span></p>
-                            <p style="margin: 12px 0 8px 0; font-size: 0.95em;"><strong>Costo SKU (USD/paquete):</strong>
-                                <input type="number" id="prop2-sku-precio" value="0.9" min="0" step="0.01"
-                                    onclick="event.stopPropagation()"
-                                    style="width: 90px; margin-left: 8px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95em;">
-                            </p>
                             <p style="margin: 16px 0 8px 0; font-size: 1.1em; color: var(--value-green);"><strong>Inversión (USD):</strong> <span id="prop2-precio" style="font-size: 1.3em;">-</span></p>
+                            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid #e0e0e0;">
+                                <p style="margin: 6px 0; font-size: 0.9em;"><strong>Hasta:</strong>
+                                    <select id="prop2-hasta-mes" onclick="event.stopPropagation()"
+                                        style="margin-left: 8px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;">
+                                        <option value="0">Jun 26</option>
+                                        <option value="1">Jul 26</option>
+                                        <option value="2">Ago 26</option>
+                                        <option value="3">Sep 26</option>
+                                        <option value="4">Oct 26</option>
+                                        <option value="5">Nov 26</option>
+                                        <option value="6">Dic 26</option>
+                                        <option value="7">Ene 27</option>
+                                        <option value="8">Feb 27</option>
+                                        <option value="9">Mar 27</option>
+                                        <option value="10">Abr 27</option>
+                                        <option value="11">May 27</option>
+                                        <option value="12">Jun 27</option>
+                                        <option value="13">Jul 27</option>
+                                        <option value="14">Ago 27</option>
+                                        <option value="15">Sep 27</option>
+                                        <option value="16">Oct 27</option>
+                                        <option value="17">Nov 27</option>
+                                        <option value="18">Dic 27</option>
+                                        <option value="19">Ene 28</option>
+                                        <option value="20">Feb 28</option>
+                                        <option value="21">Mar 28</option>
+                                        <option value="22">Abr 28</option>
+                                        <option value="23">May 28</option>
+                                        <option value="24" selected>Jun 28</option>
+                                        <option value="25">Jul 28</option>
+                                    </select>
+                                </p>
+                                <p style="margin: 8px 0 0 0; font-size: 0.9em;"><strong>Costo SKU (USD/paquete):</strong>
+                                    <input type="number" id="prop2-sku-precio" value="0.9" min="0" step="0.01"
+                                        onclick="event.stopPropagation()"
+                                        style="width: 90px; margin-left: 8px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;">
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1731,6 +1764,11 @@
             if (prop2SkuPrecioInput) {
                 prop2SkuPrecioInput.addEventListener('input', updateWaProjection);
             }
+
+            const prop2HastaMesSelect = document.getElementById('prop2-hasta-mes');
+            if (prop2HastaMesSelect) {
+                prop2HastaMesSelect.addEventListener('change', updateWaProjection);
+            }
         }
 
         function selectPropuesta(propuesta) {
@@ -1978,11 +2016,27 @@
             document.getElementById('prop1-adicional').textContent = formatNumber(adicional2026);
             document.getElementById('prop1-precio').textContent = '$' + formatNumber(inversion2026, 2);
 
-            // Propuesta 2: Capacidad hasta Diciembre 2027
-            const adicional2027 = Math.max(0, acumuladoDic2027 - wa.contratado);
+            // Propuesta 2: hasta el mes seleccionado (default Jun 28, índice 24)
+            const prop2HastaSelect = document.getElementById('prop2-hasta-mes');
+            const prop2HastaIdx = prop2HastaSelect ? parseInt(prop2HastaSelect.value, 10) : 24;
+            const acumuladoProp2 = consumoAcumulado[prop2HastaIdx] || 0;
+            const adicional2027 = Math.max(0, acumuladoProp2 - wa.contratado);
             const inversion2027 = adicional2027 * precioPorPaqueteProp2;
 
-            document.getElementById('prop2-consumo').textContent = formatNumber(acumuladoDic2027);
+            const mesesNombre = ['Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+                                 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+                                 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'];
+            const aniosFull = ['2026', '2026', '2026', '2026', '2026', '2026', '2026',
+                               '2027', '2027', '2027', '2027', '2027', '2027',
+                               '2027', '2027', '2027', '2027', '2027', '2027',
+                               '2028', '2028', '2028', '2028', '2028', '2028', '2028'];
+            const tituloProp2 = document.getElementById('prop2-titulo-mes');
+            const subtituloProp2 = document.getElementById('prop2-subtitulo');
+            if (tituloProp2) tituloProp2.textContent = `${mesesNombre[prop2HastaIdx]} ${aniosFull[prop2HastaIdx]}`;
+            if (subtituloProp2) subtituloProp2.textContent = `${prop2HastaIdx + 1} ${prop2HastaIdx + 1 === 1 ? 'MES' : 'MESES'} · JUN 26 → ${meses[prop2HastaIdx].toUpperCase()}`;
+
+            document.getElementById('prop2-consumo').textContent = formatNumber(acumuladoProp2);
             document.getElementById('prop2-actual').textContent = formatNumber(wa.contratado);
             document.getElementById('prop2-adicional').textContent = formatNumber(adicional2027);
             document.getElementById('prop2-precio').textContent = '$' + formatNumber(inversion2027, 2);
@@ -1997,7 +2051,7 @@
             if (propuestaSeleccionada === '2026') {
                 capacidadEfectiva = acumuladoDic2026;
             } else if (propuestaSeleccionada === '2027') {
-                capacidadEfectiva = acumuladoDic2027;
+                capacidadEfectiva = acumuladoProp2;
             }
 
             // Recalcular overage con capacidad efectiva
