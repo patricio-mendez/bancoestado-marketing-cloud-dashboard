@@ -1012,6 +1012,11 @@
                             <p style="margin: 8px 0; font-size: 0.95em;"><strong>Consumo proyectado:</strong> <span id="prop2-consumo">-</span></p>
                             <p style="margin: 8px 0; font-size: 0.95em;"><strong>Capacidad actual:</strong> <span id="prop2-actual">-</span></p>
                             <p style="margin: 8px 0; font-size: 0.95em;"><strong>Capacidad adicional:</strong> <span id="prop2-adicional">-</span></p>
+                            <p style="margin: 12px 0 8px 0; font-size: 0.95em;"><strong>Costo SKU (USD/paquete):</strong>
+                                <input type="number" id="prop2-sku-precio" value="0.9" min="0" step="0.01"
+                                    onclick="event.stopPropagation()"
+                                    style="width: 90px; margin-left: 8px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95em;">
+                            </p>
                             <p style="margin: 16px 0 8px 0; font-size: 1.1em; color: var(--value-green);"><strong>Inversión (USD):</strong> <span id="prop2-precio" style="font-size: 1.3em;">-</span></p>
                         </div>
                     </div>
@@ -1721,6 +1726,11 @@
                 document.getElementById('wa-caso2-display').textContent = formatNumber(e.target.value);
                 updateWaProjection();
             });
+
+            const prop2SkuPrecioInput = document.getElementById('prop2-sku-precio');
+            if (prop2SkuPrecioInput) {
+                prop2SkuPrecioInput.addEventListener('input', updateWaProjection);
+            }
         }
 
         function selectPropuesta(propuesta) {
@@ -1953,7 +1963,11 @@
 
 
             // Calcular propuestas de crecimiento
-            const precioPorPaquete = 0.9; // USD por paquete de créditos
+            const precioPorPaquete = 0.9; // USD por paquete de créditos (Propuesta 1 - default)
+            const prop2SkuInput = document.getElementById('prop2-sku-precio');
+            const precioPorPaqueteProp2 = prop2SkuInput && !isNaN(parseFloat(prop2SkuInput.value))
+                ? parseFloat(prop2SkuInput.value)
+                : 0.9;
 
             // Propuesta 1: Capacidad hasta Diciembre 2026
             const adicional2026 = Math.max(0, acumuladoDic2026 - wa.contratado);
@@ -1966,7 +1980,7 @@
 
             // Propuesta 2: Capacidad hasta Diciembre 2027
             const adicional2027 = Math.max(0, acumuladoDic2027 - wa.contratado);
-            const inversion2027 = adicional2027 * precioPorPaquete;
+            const inversion2027 = adicional2027 * precioPorPaqueteProp2;
 
             document.getElementById('prop2-consumo').textContent = formatNumber(acumuladoDic2027);
             document.getElementById('prop2-actual').textContent = formatNumber(wa.contratado);
